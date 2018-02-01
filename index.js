@@ -8,6 +8,7 @@ const request = require("request");
 const ACTION_INPUT_WELCOME = "input.welcome";
 const ACTION_INPUT_CONDITION = "input.condition";
 const ACTION_INPUT_MORE_EVENTS = "input.more_events";
+const ACTION_INPUT_UNKNOWN = "input.unknown";
 const ACTION_HELP = "help";
 const ACTION_QUIT = "quit";
 
@@ -108,12 +109,14 @@ exports.connpass = (req, res) => {
 
     const _createStartedAtPhrase = datetime => {
         const date = new Date(datetime);
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
         const hour = date.getHours();
         const minute = date.getMinutes();
         if (minute === 0) {
-            return `${hour}時`;
+            return `${month}月${day}日 ${hour}時`;
         } else {
-            return `${hour}時${minute}分`;
+            return `${month}月${day}日 ${hour}時${minute}分`;
         }
     };
 
@@ -125,7 +128,11 @@ exports.connpass = (req, res) => {
         const place = event.place;
         const title = event.title;
         const startedAt = _createStartedAtPhrase(event.startedAt);
-        return `${place}にて、${title}が、${startedAt}から行われます。`;
+        let msg = "";
+        if (place) {
+            msg += `${place}にて、`;
+        }
+        return `${msg}${title}が、${startedAt}から行われます。`;
     };
 
     const _createConditionPhrase = (date, prefecture, keyword) => {
@@ -215,6 +222,15 @@ exports.connpass = (req, res) => {
         }
     };
 
+    const inputUnknown = app => {
+        const msg = [
+            "よくわかりませんでした。いつ、どこで、どんな勉強会が開催されるのかを条件指定してください。",
+            "よく聞き取れませんでした。いつ、どこで、どんな勉強会が開催されるのかを条件指定してください。",
+            "何と言ったのでしょうか？いつ、どこで、どんな勉強会が開催されるのかを条件指定してください。"
+        ];
+        app.ask(msg[Math.floor(Math.random() * msg.length)], _noInputCondition());
+    };
+
     const help = app => {
         app.ask(
             "勉強会の開催情報を探すために、いつ、どこで、どんな勉強会が開催されるのかを条件指定してください。例えば、「明日東京で開催されるJavaScript関連の勉強会を教えて」、というように言ってみてください。",
@@ -231,6 +247,7 @@ exports.connpass = (req, res) => {
     actionMap.set(ACTION_INPUT_WELCOME, inputWelcome);
     actionMap.set(ACTION_INPUT_CONDITION, inputCondition);
     actionMap.set(ACTION_INPUT_MORE_EVENTS, inputMoreEvents);
+    actionMap.set(ACTION_INPUT_UNKNOWN, inputUnknown);
     actionMap.set(ACTION_HELP, help);
     actionMap.set(ACTION_QUIT, quit);
 
