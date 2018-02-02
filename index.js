@@ -108,11 +108,11 @@ exports.connpass = (req, res) => {
     };
 
     const _createStartedAtPhrase = datetime => {
-        const date = new Date(datetime);
-        const month = date.getMonth() + 1;
-        const day = date.getDate();
-        const hour = date.getHours();
-        const minute = date.getMinutes();
+        // datetime = '2018-02-03T09:40:00+09:00'
+        const month = Number(datetime.substring(5, 7));
+        const day = Number(datetime.substring(8, 10));
+        const hour = Number(datetime.substring(11, 13));
+        const minute = Number(datetime.substring(14, 16));
         if (minute === 0) {
             return `${month}月${day}日 ${hour}時`;
         } else {
