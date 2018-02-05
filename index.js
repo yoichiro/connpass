@@ -7,8 +7,10 @@ const request = require("request");
 
 const ACTION_INPUT_WELCOME = "input.welcome";
 const ACTION_INPUT_CONDITION = "input.condition";
-const ACTION_INPUT_MORE_EVENTS = "input.more_events";
+const ACTION_MORE_EVENTS_CONTINUE = "more_events.continue";
+const ACTION_MORE_EVENTS_CONDITION = "more_events.condition";
 const ACTION_INPUT_UNKNOWN = "input.unknown";
+const ACTION_MORE_EVENTS_UNKNOWN = "more_events.unknown";
 const ACTION_HELP = "help";
 const ACTION_QUIT = "quit";
 
@@ -178,10 +180,10 @@ exports.connpass = (req, res) => {
                             keyword: keyword,
                             result: result
                         };
-                        msg += "続けますか？";
+                        msg += `${start + 3}件目以降に進みますか？それとも他の条件で検索しますか？`;
                         app.setContext(CONTEXT_INPUT_CONDITION, 0);
                         app.setContext(CONTEXT_MORE_EVENTS);
-                        app.askForConfirmation(msg);
+                        app.ask(msg, _noInputCondition());
                     } else {
                         msg += "他の条件をどうぞ。";
                         app.setContext(CONTEXT_INPUT_CONDITION);
@@ -204,22 +206,22 @@ exports.connpass = (req, res) => {
         _fetchEventsAndReply(date, prefecture, keyword, 1, true);
     };
 
-    const inputMoreEvents = app => {
-        if (app.getUserConfirmation()) {
-            const previousCondition = app.data.previousCondition;
-            const date = previousCondition.date;
-            const prefecture = previousCondition.getState;
-            const keyword = previousCondition.keyword;
-            const previousResult = previousCondition.result;
-            const start = previousResult.resultsStart + previousResult.resultsReturned;
-            _fetchEventsAndReply(date, prefecture, keyword, start, false);
-        } else {
-            const msg = "他の条件をどうぞ。";
-            app.setContext(CONTEXT_INPUT_CONDITION);
-            app.setContext(CONTEXT_MORE_EVENTS, 0);
-            delete app.data.previousCondition;
-            app.ask(msg, _noInputCondition());
-        }
+    const moreEventsContinue = app => {
+        const previousCondition = app.data.previousCondition;
+        const date = previousCondition.date;
+        const prefecture = previousCondition.getState;
+        const keyword = previousCondition.keyword;
+        const previousResult = previousCondition.result;
+        const start = previousResult.resultsStart + previousResult.resultsReturned;
+        _fetchEventsAndReply(date, prefecture, keyword, start, false);
+    };
+
+    const moreEventsCondition = app => {
+        const msg = "他の条件をどうぞ。";
+        app.setContext(CONTEXT_INPUT_CONDITION);
+        app.setContext(CONTEXT_MORE_EVENTS, 0);
+        delete app.data.previousCondition;
+        app.ask(msg, _noInputCondition());
     };
 
     const inputUnknown = app => {
@@ -228,6 +230,19 @@ exports.connpass = (req, res) => {
             "よく聞き取れませんでした。いつ、どこで、どんな勉強会が開催されるのかを条件指定してください。",
             "何と言ったのでしょうか？いつ、どこで、どんな勉強会が開催されるのかを条件指定してください。"
         ];
+        app.setContext(CONTEXT_INPUT_CONDITION);
+        app.setContext(CONTEXT_MORE_EVENTS, 0);
+        app.ask(msg[Math.floor(Math.random() * msg.length)], _noInputCondition());
+    };
+
+    const moreEventsUnknown = app => {
+        const msg = [
+            "よくわかりませんでした。続きの勉強会に進みますか？それとも他の条件で探しますか？",
+            "よく聞き取れませんでした。続きの勉強会に進みますか？それとも他の条件で探しますか？",
+            "何と言ったのでしょうか？続きの勉強会に進みますか？それとも他の条件で探しますか？"
+        ];
+        app.setContext(CONTEXT_INPUT_CONDITION, 0);
+        app.setContext(CONTEXT_MORE_EVENTS);
         app.ask(msg[Math.floor(Math.random() * msg.length)], _noInputCondition());
     };
 
@@ -246,8 +261,10 @@ exports.connpass = (req, res) => {
     const actionMap = new Map();
     actionMap.set(ACTION_INPUT_WELCOME, inputWelcome);
     actionMap.set(ACTION_INPUT_CONDITION, inputCondition);
-    actionMap.set(ACTION_INPUT_MORE_EVENTS, inputMoreEvents);
+    actionMap.set(ACTION_MORE_EVENTS_CONTINUE, moreEventsContinue);
+    actionMap.set(ACTION_MORE_EVENTS_CONDITION, moreEventsCondition);
     actionMap.set(ACTION_INPUT_UNKNOWN, inputUnknown);
+    actionMap.set(ACTION_MORE_EVENTS_UNKNOWN, moreEventsUnknown);
     actionMap.set(ACTION_HELP, help);
     actionMap.set(ACTION_QUIT, quit);
 
