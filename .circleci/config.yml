@@ -8,3 +8,8 @@ jobs:
       - run:
           name: dialogflow-query-checker
           command: bin/dialogflow-query-checker run connpass_query_test.yml
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test
