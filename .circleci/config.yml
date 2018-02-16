@@ -5,6 +5,9 @@ jobs:
       - image: ubuntu
     steps:
       - run:
+          name: Update apt-get
+          command: apt-get update
+      - run:
           name: Install root-ca
           command: apt-get install ca-certificates
       - checkout
