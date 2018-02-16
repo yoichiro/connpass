@@ -1,0 +1,910 @@
+defaultLanguage: ja
+tests:
+  -
+    condition:
+      query: "今日東京でJavaScriptに関する勉強会を教えて"
+    expect:
+      action: input.welcome
+      intentName: input.welcome
+      parameters:
+        date: "${date.today}"
+        prefecture: 東京都
+        keyword: JavaScript
+        event:
+      speech: "^日付が${date.today}、場所が東京都、キーワードがJavaScriptの条件にマッチする勉強会は、"
+  -
+    condition:
+      query: "今日東京で開催されるJavaScriptに関する勉強会を教えて"
+    expect:
+      action: input.welcome
+      intentName: input.welcome
+      parameters:
+        date: "${date.today}"
+        prefecture: 東京都
+        keyword: JavaScript
+        event:
+      speech: "^日付が${date.today}、場所が東京都、キーワードがJavaScriptの条件にマッチする勉強会は、"
+  -
+    condition:
+      query: "東京で今日のJavaScriptに関する勉強会を教えて"
+    expect:
+      action: input.welcome
+      intentName: input.welcome
+      parameters:
+        date: "${date.today}"
+        prefecture: 東京都
+        keyword: JavaScript
+        event:
+      speech: "^日付が${date.today}、場所が東京都、キーワードがJavaScriptの条件にマッチする勉強会は、"
+  -
+    condition:
+      query: "東京で今日開催されるJavaScriptに関する勉強会を教えて"
+    expect:
+      action: input.welcome
+      intentName: input.welcome
+      parameters:
+        date: "${date.today}"
+        prefecture: 東京都
+        keyword: JavaScript
+        event:
+      speech: "^日付が${date.today}、場所が東京都、キーワードがJavaScriptの条件にマッチする勉強会は、"
+  -
+    condition:
+      query: "東京で今日開催されるJavaScript関連の勉強会を教えて"
+    expect:
+      action: input.welcome
+      intentName: input.welcome
+      parameters:
+        date: "${date.today}"
+        prefecture: 東京都
+        keyword: JavaScript
+        event:
+      speech: "^日付が${date.today}、場所が東京都、キーワードがJavaScriptの条件にマッチする勉強会は、"
+  -
+    condition:
+      query: "東京で今日のJavaScript関連の勉強会を教えて"
+    expect:
+      action: input.welcome
+      intentName: input.welcome
+      parameters:
+        date: "${date.today}"
+        prefecture: 東京都
+        keyword: JavaScript
+        event:
+      speech: "^日付が${date.today}、場所が東京都、キーワードがJavaScriptの条件にマッチする勉強会は、"
+  -
+    condition:
+      query: "今日東京で開催されるJavaScript関連の勉強会を教えて"
+    expect:
+      action: input.welcome
+      intentName: input.welcome
+      parameters:
+        date: "${date.today}"
+        prefecture: 東京都
+        keyword: JavaScript
+        event:
+      speech: "^日付が${date.today}、場所が東京都、キーワードがJavaScriptの条件にマッチする勉強会は、"
+  -
+    condition:
+      query: "今日東京でJavaScript関連の勉強会を教えて"
+    expect:
+      action: input.welcome
+      intentName: input.welcome
+      parameters:
+        date: "${date.today}"
+        prefecture: 東京都
+        keyword: JavaScript
+        event:
+      speech: "^日付が${date.today}、場所が東京都、キーワードがJavaScriptの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "明日東京でRubyに関する勉強会"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture: 東京都
+        keyword: Ruby
+        event: 勉強会
+      speech: "^日付が${date.tomorrow}、場所が東京都、キーワードがRubyの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "明日東京でRuby関係"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture: 東京都
+        keyword: Ruby
+        event:
+      speech: "^日付が${date.tomorrow}、場所が東京都、キーワードがRubyの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "明日東京でRuby関係"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture: 東京都
+        keyword: Ruby
+        event:
+      speech: "^日付が${date.tomorrow}、場所が東京都、キーワードがRubyの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "東京で明日Ruby関連"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture: 東京都
+        keyword: Ruby
+        event:
+      speech: "^日付が${date.tomorrow}、場所が東京都、キーワードがRubyの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "東京で明日Ruby関係"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture: 東京都
+        keyword: Ruby
+        event:
+      speech: "^日付が${date.tomorrow}、場所が東京都、キーワードがRubyの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "東京で明日Rubyに関する勉強会"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture: 東京都
+        keyword: Ruby
+        event: 勉強会
+      speech: "^日付が${date.tomorrow}、場所が東京都、キーワードがRubyの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "東京で明日"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture: 東京都
+        keyword:
+        event:
+      speech: "^日付が${date.tomorrow}、場所が東京都の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "明日東京"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture: 東京都
+        keyword:
+        event:
+      speech: "^日付が${date.tomorrow}、場所が東京都の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "東京で今日JavaScript関連の勉強会"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.today}"
+        prefecture: 東京都
+        keyword: JavaScript
+        event: 勉強会
+      speech: "^日付が${date.today}、場所が東京都、キーワードがJavaScriptの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "明日Rubyに関する勉強会"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture:
+        keyword: Ruby
+        event: 勉強会
+      speech: "^日付が${date.tomorrow}、キーワードがRubyの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "明日東京で開催されるRubyに関する勉強会を教えて"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture: 東京都
+        keyword: Ruby
+        event: 勉強会
+      speech: "^日付が${date.tomorrow}、場所が東京都、キーワードがRubyの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "明日東京で開催されるRubyに関する勉強会"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture: 東京都
+        keyword: Ruby
+        event: 勉強会
+      speech: "^日付が${date.tomorrow}、場所が東京都、キーワードがRubyの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "東京で明日開催されるRubyに関する勉強会を教えて"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture: 東京都
+        keyword: Ruby
+        event: 勉強会
+      speech: "^日付が${date.tomorrow}、場所が東京都、キーワードがRubyの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "明日東京で開催されるRuby関連の勉強会を教えて"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture: 東京都
+        keyword: Ruby
+        event: 勉強会
+      speech: "^日付が${date.tomorrow}、場所が東京都、キーワードがRubyの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "東京で明日開催されるRuby関連の勉強会を教えて"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture: 東京都
+        keyword: Ruby
+        event: 勉強会
+      speech: "^日付が${date.tomorrow}、場所が東京都、キーワードがRubyの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "明日開催されるRubyに関する勉強会を教えて"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture:
+        keyword: Ruby
+        event: 勉強会
+      speech: "^日付が${date.tomorrow}、キーワードがRubyの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "明日開催されるRuby関連の勉強会を教えて"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture:
+        keyword: Ruby
+        event: 勉強会
+      speech: "^日付が${date.tomorrow}、キーワードがRubyの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "明日開催されるRuby関連の勉強会"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture:
+        keyword: Ruby
+        event: 勉強会
+      speech: "^日付が${date.tomorrow}、キーワードがRubyの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "明日開催されるRubyに関する勉強会"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture:
+        keyword: Ruby
+        event: 勉強会
+      speech: "^日付が${date.tomorrow}、キーワードがRubyの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "東京で明日開催されるRuby関連の勉強会"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture: 東京都
+        keyword: Ruby
+        event: 勉強会
+      speech: "^日付が${date.tomorrow}、場所が東京都、キーワードがRubyの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "明日東京で開催されるRuby関連の勉強会"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture: 東京都
+        keyword: Ruby
+        event: 勉強会
+      speech: "^日付が${date.tomorrow}、場所が東京都、キーワードがRubyの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "東京で明日開催されるRubyに関する勉強会"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture: 東京都
+        keyword: Ruby
+        event: 勉強会
+      speech: "^日付が${date.tomorrow}、場所が東京都、キーワードがRubyの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "明日東京で開催される勉強会"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture: 東京都
+        keyword:
+        event: 勉強会
+      speech: "^日付が${date.tomorrow}、場所が東京都の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "東京で明日"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture: 東京都
+        keyword:
+        event:
+      speech: "^日付が${date.tomorrow}、場所が東京都の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "今日"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.today}"
+        prefecture:
+        keyword:
+        event:
+      speech: "^日付が${date.today}の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "明日東京"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture: 東京都
+        keyword:
+        event:
+      speech: "^日付が${date.tomorrow}、場所が東京都の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "明日"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture:
+        keyword:
+        event:
+      speech: "^日付が${date.tomorrow}の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "今日東京で開催されるジャバスプリクトに関する勉強会"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.today}"
+        prefecture: 東京都
+        keyword: ジャバスプリクト
+        event: 勉強会
+      speech: "^日付が${date.today}、場所が東京都、キーワードがジャバスプリクトの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "会計に関する勉強会は"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date:
+        prefecture:
+        keyword: 会計
+        event: 勉強会
+      speech: "^キーワードが会計の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "ファイナンスに関する勉強会は"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date:
+        prefecture:
+        keyword: ファイナンス
+        event: 勉強会
+      speech: "^キーワードがファイナンスの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "ビジネスに関する勉強会は"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date:
+        prefecture:
+        keyword: ビジネス
+        event: 勉強会
+      speech: "^キーワードがビジネスの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "神奈川県"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date:
+        prefecture: 神奈川県
+        keyword:
+        event:
+      speech: "^場所が神奈川県の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "京都"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date:
+        prefecture: 京都府
+        keyword:
+        event:
+      speech: "^場所が京都府の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "東京"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date:
+        prefecture: 東京都
+        keyword:
+        event:
+      speech: "^場所が東京都の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "大阪パイソンの事をもっと教えて"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date:
+        prefecture: 大阪府
+        keyword: パイソン
+        event:
+      speech: "^場所が大阪府、キーワードがパイソンの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "大阪で"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date:
+        prefecture: 大阪府
+        keyword:
+        event:
+      speech: "^場所が大阪府の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "千葉"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date:
+        prefecture: 千葉県
+        keyword:
+        event:
+      speech: "^場所が千葉県の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "大阪"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date:
+        prefecture: 大阪府
+        keyword:
+        event:
+      speech: "^場所が大阪府の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "愛知県"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date:
+        prefecture: 愛知県
+        keyword:
+        event:
+      speech: "^場所が愛知県の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "名古屋2月28日"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: 2018-02-28
+        prefecture:
+        keyword: 名古屋
+        event:
+      speech: "^日付が2月28日、キーワードが名古屋の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "今日の"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: ${date.today}
+        prefecture:
+        keyword:
+        event:
+      speech: "^日付が${date.today}の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "今日の予定は"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: ${date.today}
+        prefecture:
+        keyword:
+        event:
+      speech: "^日付が${date.today}の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "都内の予定は"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date:
+        prefecture: 東京都
+        keyword:
+        event:
+      speech: "^場所が東京都の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "都内勉強会"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date:
+        prefecture: 東京都
+        keyword:
+        event:
+      speech: "^場所が東京都の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "今日ハンズオン"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.today}"
+        prefecture:
+        keyword: ハンズオン
+        event:
+      speech: "^日付が${date.today}、キーワードがハンズオンの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "東京都"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date:
+        prefecture: 東京都
+        keyword:
+        event:
+      speech: "^場所が東京都の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "2月10日"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: 2019-02-10
+        prefecture:
+        keyword:
+        event:
+      speech: "^日付が2月10日の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "今日東京で開催されるセミナーを教えて"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.today}"
+        prefecture: 東京都
+        keyword:
+        event:
+      speech: "^日付が${date.today}、場所が東京都の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "明日ハンズオン"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture:
+        keyword: ハンズオン
+        event:
+      speech: "^日付が${date.tomorrow}、キーワードがハンズオンの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "2月16日の東京で機械学習"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: 2018-02-16
+        prefecture: 東京都
+        keyword: 機械学習
+        event:
+      speech: "^日付が2月16日、場所が東京都、キーワードが機械学習の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "福島県"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date:
+        prefecture: 福島県
+        keyword:
+        event:
+      speech: "^場所が福島県の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "長崎"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date:
+        prefecture: 長崎県
+        keyword:
+        event:
+      speech: "^場所が長崎県の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "新潟県"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date:
+        prefecture: 新潟県
+        keyword:
+        event:
+      speech: "^場所が新潟県の条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "東京都のスマートスピーカー"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date:
+        prefecture: 東京都
+        keyword: スマートスピーカー
+        event:
+      speech: "^場所が東京都、キーワードがスマートスピーカーの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "東京都VR"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date:
+        prefecture: 東京都
+        keyword: VR
+        event:
+      speech: "^場所が東京都、キーワードがVRの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "東京都でアクセシビリティ"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date:
+        prefecture: 東京都
+        keyword: アクセシビリティ
+        event:
+      speech: "^場所が東京都、キーワードがアクセシビリティの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "場所が東京都でキーワードがJavaScriptの条件に合致する勉強会"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date:
+        prefecture: 東京都
+        keyword: JavaScript
+        event: 勉強会
+      speech: "^場所が東京都、キーワードがJavaScriptの条件にマッチする勉強会は、"
+  -
+    condition:
+      contexts:
+        - input_condition
+      query: "埼玉県で明日"
+    expect:
+      action: input.condition
+      intentName: input.condition
+      parameters:
+        date: "${date.tomorrow}"
+        prefecture: 埼玉県
+        keyword:
+        event:
+      speech: "^日付が${date.tomorrow}、場所が埼玉県の条件にマッチする勉強会は、"
