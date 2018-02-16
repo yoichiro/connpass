@@ -8,7 +8,7 @@ jobs:
           name: Update apt-get
           command: apt-get update
       - run:
-          name: Install root-ca
+          name: Install ca-certificates
           command: apt-get install -y ca-certificates
       - checkout
       - run:
