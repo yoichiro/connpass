@@ -2,7 +2,7 @@ version: 2
 jobs:
   test:
     docker:
-      - image: debian:stretch
+      - image: ubuntu
     steps:
       - run:
           name: Install root-ca
