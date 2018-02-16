@@ -14,12 +14,12 @@ jobs:
       - run:
           name: dialogflow-query-checker
           command: |
-            mkdir -p ./reports
-            bin/dialogflow-query-checker run -o ./reports/test_result.xml connpass_query_test.yml
+            mkdir -p ~/repo/dialogflow-query-checker
+            bin/dialogflow-query-checker run -o ~/repo/dialogflow-query-checker/test_result.xml connpass_query_test.yml
       - store_test_results:
-          path: ./reports
+          path: ~/repo/dialogflow-query-checker
       - store_artifacts:
-          path: ./reports
+          path: ~/repo/dialogflow-query-checker
 workflows:
   version: 2
   commit:
