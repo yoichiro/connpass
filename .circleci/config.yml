@@ -1,13 +1,10 @@
 version: 2
 jobs:
-  build:
+  test:
     docker:
       - image: debian:stretch
     steps:
       - checkout
       - run:
-          name: Greeting
-          command: echo Hello, world!
-      - run:
-          name: Print the Current Time
-          command: date
+          name: dialogflow-query-checker
+          command: bin/dialogflow-query-checker run connpass_query_test.yml
