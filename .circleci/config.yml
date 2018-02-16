@@ -9,7 +9,7 @@ jobs:
           command: apt-get update
       - run:
           name: Install root-ca
-          command: apt-get install ca-certificates
+          command: apt-get install -y ca-certificates
       - checkout
       - run:
           name: dialogflow-query-checker
