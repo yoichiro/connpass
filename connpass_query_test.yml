@@ -791,7 +791,7 @@ tests:
       action: input.condition
       intentName: input.condition
       parameters:
-        date: 2018-02-16
+        date: 2019-02-16
         prefecture: 東京都
         keyword: 機械学習
         event:
