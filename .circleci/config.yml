@@ -15,7 +15,7 @@ jobs:
           name: dialogflow-query-checker
           command: |
             mkdir -p ~/repo/dialogflow-query-checker
-            bin/dialogflow-query-checker run -o ~/repo/dialogflow-query-checker/test_result.xml connpass_query_test.yml
+            bin/dialogflow-query-checker run -r 1 -o ~/repo/dialogflow-query-checker/test_result.xml connpass_query_test.yml
       - store_test_results:
           path: ~/repo
       - store_artifacts:
