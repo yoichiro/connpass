@@ -1,4 +1,5 @@
 defaultLanguage: ja
+defaultLocale: ja_JP
 tests:
   -
     condition:
