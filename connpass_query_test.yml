@@ -768,7 +768,7 @@ tests:
         date: "${date.today}"
         prefecture: 東京都
         keyword:
-        event:
+        event: 勉強会
       speech: "^日付が${date.today}、場所が東京都の条件にマッチする勉強会は、"
   -
     condition:
