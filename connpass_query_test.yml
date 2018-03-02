@@ -1,5 +1,6 @@
 defaultLanguage: ja
 defaultLocale: ja_JP
+dateMacroFormat: 1月2日
 tests:
   -
     condition:
@@ -647,16 +648,16 @@ tests:
     condition:
       contexts:
         - input_condition
-      query: "名古屋2月28日"
+      query: "名古屋${date.today}"
     expect:
       action: input.condition
       intentName: input.condition
       parameters:
-        date: 2018-02-28
+        date: ${date.today}
         prefecture:
         keyword: 名古屋
         event:
-      speech: "^日付が2月28日、キーワードが名古屋の条件にマッチする勉強会は、"
+      speech: "^日付が${date.today}、キーワードが名古屋の条件にマッチする勉強会は、"
   -
     condition:
       contexts:
