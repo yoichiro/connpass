@@ -2,9 +2,13 @@
   "name": "connpass",
   "version": "0.0.1",
   "dependencies": {
-    "actions-on-google": "^2.1.2",
-    "firebase-admin": "^5.12.1",
-    "firebase-functions": "^1.0.3",
-    "request": "^2.87.0"
+    "actions-on-google": "^2.8.0",
+    "firebase-admin": "^8.2.0",
+    "firebase-functions": "^3.1.0",
+    "request": "^2.88.0"
+  },
+  "scripts": {
+    "gcloud-start": "gcloud config set project connpass-2234f",
+    "deploy": "gcloud functions deploy connpass --runtime nodejs8 --trigger-http"
   }
 }
