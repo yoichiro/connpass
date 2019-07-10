@@ -170,6 +170,10 @@ app.intent("input.condition", (conv, { date, prefecture, keyword }) => {
     return _fetchEventsAndReply(conv, date, prefecture, keyword, 1, true);
 });
 
+app.intent("implicit_invocation", (conv, { date, prefecture, keyword }) => {
+    return _fetchEventsAndReply(conv, date, prefecture, keyword, 1, true);
+});
+
 app.intent("more_events.continue", conv => {
     const previousCondition = conv.data.previousCondition;
     const date = previousCondition.date;
