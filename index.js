@@ -1,6 +1,11 @@
 "use strict"
 
-const { dialogflow } = require("actions-on-google");
+const {
+    dialogflow,
+    BrowseCarousel,
+    BrowseCarouselItem,
+    Suggestions
+} = require("actions-on-google");
 const request = require("request");
 const functions = require("firebase-functions");
 
@@ -16,6 +21,7 @@ const _hasCondition = (date, prefecture, keyword) => {
 const _fetchEventsAndReply = (conv, date, prefecture, keyword, start, hasTotalCount) => {
     return _fetchEvents(date, prefecture, keyword, start)
         .then(result => {
+            const canBrowsable = conv.screen && conv.surface.capabilities.has('actions.capability.WEB_BROWSER');
             if (result.events.length === 0) {
                 conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
                 conv.contexts.delete(CONTEXT_MORE_EVENTS);
@@ -23,12 +29,14 @@ const _fetchEventsAndReply = (conv, date, prefecture, keyword, start, hasTotalCo
                 conv.ask(`${_createConditionPhrase(date, prefecture, keyword)}予定されていません。他の条件をどうぞ。`);
             } else {
                 let msg = hasTotalCount ? `${_createConditionPhrase(date, prefecture, keyword)}${result.resultsAvailable}件予定されています。` : "";
-                if (result.events.length === 1) {
-                    msg += _createEventInformationPhrase(result.events[0]);
-                } else {
-                    result.events.forEach((event, index) => {
-                        msg += _createEventInformationPhraseWithIndex(start + index, event);
-                    });
+                if (!canBrowsable) {
+                    if (result.events.length === 1) {
+                        msg += _createEventInformationPhrase(result.events[0]);
+                    } else {
+                        result.events.forEach((event, index) => {
+                            msg += _createEventInformationPhraseWithIndex(start + index, event);
+                        });
+                    }
                 }
                 if (_isExistsMoreEvents(result)) {
                     conv.data.previousCondition = {
@@ -41,12 +49,26 @@ const _fetchEventsAndReply = (conv, date, prefecture, keyword, start, hasTotalCo
                     conv.contexts.delete(CONTEXT_INPUT_CONDITION);
                     conv.contexts.set(CONTEXT_MORE_EVENTS, 1);
                     conv.ask(msg);
+                    conv.ask(new Suggestions("進む", "他の条件"));
                 } else {
                     msg += "他の条件をどうぞ。";
                     conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
                     conv.contexts.delete(CONTEXT_MORE_EVENTS);
                     delete conv.data.previousCondition;
                     conv.ask(msg);
+                }
+                if (canBrowsable) {
+                    const items = result.events.map(event => {
+                        return new BrowseCarouselItem({
+                            title: event.title,
+                            url: event.eventUrl,
+                            description: `${event.place}\n${_createStartedAtPhrase(event.startedAt)}`,
+                            footer: event.series.title
+                        });
+                    });
+                    conv.ask(new BrowseCarousel({
+                        items
+                    }));
                 }
             }
         })
@@ -92,11 +114,17 @@ const _fetchEvents = (date, prefecture, keyword, start) => {
                 console.log("statusCode", response.statusCode);
                 reject(response.statuscode);
             } else {
+                console.log(body.events);
                 const events = body.events.map(event => {
                     return {
                         place: event.place,
                         title: event.title,
-                        startedAt: event.started_at
+                        startedAt: event.started_at,
+                        eventUrl: event.event_url,
+                        series: {
+                            url: event.series ? event.series.url : "",
+                            title: event.series ? event.series.title : ""
+                        }
                     };
                 });
                 resolve({
