@@ -234,6 +234,7 @@ app.intent("select.event", (conv, params, option) => {
     const previousCondition = conv.data.previousCondition;
     const event = previousCondition.result.events[eventIndex];
     _replyEventBasicCard(conv, event);
+    assistantAnalytics.trace(conv);
 });
 
 app.intent("more_events.continue", conv => {
