@@ -8,6 +8,7 @@ const {
 } = require("actions-on-google");
 const request = require("request");
 const functions = require("firebase-functions");
+const assistantAnalytics = require("./assistant-analytics");
 
 const CONTEXT_INPUT_CONDITION = "input_condition";
 const CONTEXT_MORE_EVENTS = "more_events";
@@ -71,10 +72,12 @@ const _fetchEventsAndReply = (conv, date, prefecture, keyword, start, hasTotalCo
                     }));
                 }
             }
+            assistantAnalytics.trace(conv);
         })
         .catch(error => {
             console.log("error", error);
             conv.close("内部エラーが発生したので、会話を終わります。申し訳ございません。");
+            assistantAnalytics.trace(conv);
         });
 };
 
@@ -191,6 +194,7 @@ app.intent("input.welcome", (conv, { date, prefecture, keyword }) => {
     } else {
         conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
         conv.ask("こんにちは。各地で開催される予定の勉強会について、日付や都道府県名、キーワードによってお探しいたします。条件をどうぞ。");
+        assistantAnalytics.trace(conv);
     }
 });
 
@@ -218,6 +222,7 @@ app.intent("more_events.condition", conv => {
     conv.contexts.delete(CONTEXT_MORE_EVENTS);
     delete conv.data.previousCondition;
     conv.ask(msg);
+    assistantAnalytics.trace(conv);
 });
 
 app.intent("input.unknown", conv => {
@@ -229,6 +234,7 @@ app.intent("input.unknown", conv => {
     conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
     conv.contexts.delete(CONTEXT_MORE_EVENTS);
     conv.ask(msg[Math.floor(Math.random() * msg.length)]);
+    assistantAnalytics.trace(conv);
 });
 
 app.intent("no_input.condition", conv => {
@@ -238,6 +244,7 @@ app.intent("no_input.condition", conv => {
     ];
     conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
     conv.ask(msg[Math.floor(Math.random() * msg.length)]);
+    assistantAnalytics.trace(conv);
 });
 
 app.intent("no_input.more_events", conv => {
@@ -248,6 +255,7 @@ app.intent("no_input.more_events", conv => {
     conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
     conv.contexts.delete(CONTEXT_MORE_EVENTS);
     conv.ask(msg[Math.floor(Math.random() * msg.length)]);
+    assistantAnalytics.trace(conv);
 });
 
 app.intent("more_events.unknown", conv => {
@@ -259,15 +267,18 @@ app.intent("more_events.unknown", conv => {
     conv.contexts.delete(CONTEXT_INPUT_CONDITION);
     conv.contexts.set(CONTEXT_MORE_EVENTS, 1);
     conv.ask(msg[Math.floor(Math.random() * msg.length)]);
+    assistantAnalytics.trace(conv);
 });
 
 app.intent("help", conv => {
     conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
     conv.ask("勉強会の開催情報を探すために、いつ、どこで、どんな勉強会が開催されるのかを条件指定してください。例えば、「明日東京で開催されるJavaScript関連の勉強会を教えて」、というように言ってみてください。");
+    assistantAnalytics.trace(conv);
 });
 
 app.intent("quit", conv => {
     conv.close("わかりました。また勉強会を探しに来てくださいね。");
+    assistantAnalytics.trace(conv);
 });
 
 exports.connpass = functions.https.onRequest(app);
