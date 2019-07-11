@@ -2,9 +2,10 @@
 
 const {
     dialogflow,
-    BrowseCarousel,
-    BrowseCarouselItem,
-    Suggestions
+    Suggestions,
+    BasicCard,
+    Button,
+    List
 } = require("actions-on-google");
 const request = require("request");
 const functions = require("firebase-functions");
@@ -13,6 +14,9 @@ const assistantAnalytics = require("./assistant-analytics");
 const CONTEXT_INPUT_CONDITION = "input_condition";
 const CONTEXT_MORE_EVENTS = "more_events";
 
+const EVENT_COUNT_FOR_VOICE = 3;
+const EVENT_COUNT_FOR_SCREEN = 30;
+
 const app = dialogflow({ debug: true });
 
 const _hasCondition = (date, prefecture, keyword) => {
@@ -20,9 +24,9 @@ const _hasCondition = (date, prefecture, keyword) => {
 };
 
 const _fetchEventsAndReply = (conv, date, prefecture, keyword, start, hasTotalCount) => {
-    return _fetchEvents(date, prefecture, keyword, start)
+    const eventCount = conv.screen ? EVENT_COUNT_FOR_SCREEN : EVENT_COUNT_FOR_VOICE;
+    return _fetchEvents(date, prefecture, keyword, start, eventCount)
         .then(result => {
-            const canBrowsable = conv.screen && conv.surface.capabilities.has('actions.capability.WEB_BROWSER');
             if (result.events.length === 0) {
                 conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
                 conv.contexts.delete(CONTEXT_MORE_EVENTS);
@@ -30,7 +34,7 @@ const _fetchEventsAndReply = (conv, date, prefecture, keyword, start, hasTotalCo
                 conv.ask(`${_createConditionPhrase(date, prefecture, keyword)}予定されていません。他の条件をどうぞ。`);
             } else {
                 let msg = hasTotalCount ? `${_createConditionPhrase(date, prefecture, keyword)}${result.resultsAvailable}件予定されています。` : "";
-                if (!canBrowsable) {
+                if (!conv.screen) {
                     if (result.events.length === 1) {
                         msg += _createEventInformationPhrase(result.events[0]);
                     } else {
@@ -39,37 +43,40 @@ const _fetchEventsAndReply = (conv, date, prefecture, keyword, start, hasTotalCo
                         });
                     }
                 }
-                if (_isExistsMoreEvents(result)) {
-                    conv.data.previousCondition = {
-                        date: date,
-                        getState: prefecture,
-                        keyword: keyword,
-                        result: result
-                    };
-                    msg += `${start + 3}件目以降に進みますか？それとも他の条件で検索しますか？`;
+                conv.data.previousCondition = {
+                    date: date,
+                    getState: prefecture,
+                    keyword: keyword,
+                    result: result
+                };
+                if (!conv.screen && _isExistsMoreEvents(result)) {
+                    msg += `${start + eventCount}件目以降に進みますか？それとも他の条件で検索しますか？`;
                     conv.contexts.delete(CONTEXT_INPUT_CONDITION);
                     conv.contexts.set(CONTEXT_MORE_EVENTS, 1);
                     conv.ask(msg);
                     conv.ask(new Suggestions("進む", "他の条件"));
                 } else {
-                    msg += "他の条件をどうぞ。";
+                    msg += conv.screen ? "気になる勉強会をタップしてください。もしくは、他の条件をお話ください。" : "他の条件をどうぞ。";
                     conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
                     conv.contexts.delete(CONTEXT_MORE_EVENTS);
-                    delete conv.data.previousCondition;
+                    // delete conv.data.previousCondition;
                     conv.ask(msg);
                 }
-                if (canBrowsable) {
-                    const items = result.events.map(event => {
-                        return new BrowseCarouselItem({
-                            title: event.title,
-                            url: event.eventUrl,
-                            description: `${event.place}\n${_createStartedAtPhrase(event.startedAt)}`,
-                            footer: event.series.title
+                if (conv.screen) {
+                    if (result.events.length === 1) {
+                        _replyEventBasicCard(conv, result.events[0]);
+                    } else {
+                        const items = {};
+                        result.events.forEach((event, index) => {
+                            items[`EVENT_${index}`] = {
+                                title: event.title,
+                                description: `${result.events[0].place}\n${_createStartedAtPhrase(event.startedAt)}`
+                            };
                         });
-                    });
-                    conv.ask(new BrowseCarousel({
-                        items
-                    }));
+                        conv.ask(new List({
+                            items
+                        }));
+                    }
                 }
             }
             assistantAnalytics.trace(conv);
@@ -81,10 +88,10 @@ const _fetchEventsAndReply = (conv, date, prefecture, keyword, start, hasTotalCo
         });
 };
 
-const _fetchEvents = (date, prefecture, keyword, start) => {
-    console.log("date,prefecture,keyword,start", date, prefecture, keyword, start);
+const _fetchEvents = (date, prefecture, keyword, start, count) => {
+    console.log("date,prefecture,keyword,start,count", date, prefecture, keyword, start, count);
     return new Promise((resolve, reject) => {
-        let url = `https://connpass.com/api/v1/event/?start=${start}&count=3&order=1`;
+        let url = `https://connpass.com/api/v1/event/?start=${start}&count=${count}&order=1`;
         if (date) {
             url += `&ymd=${date.substring(0, 10).replace(/-/g, "")}`;
         }
@@ -115,7 +122,7 @@ const _fetchEvents = (date, prefecture, keyword, start) => {
             } else if (response.statusCode !== 200) {
                 console.log("error-2");
                 console.log("statusCode", response.statusCode);
-                reject(response.statuscode);
+                reject(response.statusCode);
             } else {
                 console.log(body.events);
                 const events = body.events.map(event => {
@@ -124,6 +131,7 @@ const _fetchEvents = (date, prefecture, keyword, start) => {
                         title: event.title,
                         startedAt: event.started_at,
                         eventUrl: event.event_url,
+                        catchText: event.catch,
                         series: {
                             url: event.series ? event.series.url : "",
                             title: event.series ? event.series.title : ""
@@ -142,7 +150,8 @@ const _fetchEvents = (date, prefecture, keyword, start) => {
 };
 
 const _isExistsMoreEvents = result => {
-    return (result.resultsStart - 1) + result.resultsReturned < result.resultsAvailable;
+    console.log('result', JSON.stringify(result, null, 2));
+    return result.resultsStart + result.resultsReturned <= result.resultsAvailable;
 };
 
 const _createStartedAtPhrase = datetime => {
@@ -188,6 +197,20 @@ const _createConditionPhrase = (date, prefecture, keyword) => {
     return `${result.join("、")}の条件にマッチする勉強会は、`;
 };
 
+const _replyEventBasicCard = (conv, event) => {
+    conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
+    conv.contexts.delete(CONTEXT_MORE_EVENTS);
+    conv.ask("ボタンを押して詳細ページに行くか、他の条件を指定してください。");
+    conv.ask(new BasicCard({
+        title: event.title,
+        text: `${event.place}  \n${_createStartedAtPhrase(event.startedAt)}  \n${event.catchText}`,
+        buttons: new Button({
+            title: "詳細ページを開く",
+            url: event.eventUrl
+        })
+    }));
+};
+
 app.intent("input.welcome", (conv, { date, prefecture, keyword }) => {
     if (_hasCondition(date, prefecture, keyword)) {
         return _fetchEventsAndReply(conv, date, prefecture, keyword, 1, true);
@@ -204,6 +227,13 @@ app.intent("input.condition", (conv, { date, prefecture, keyword }) => {
 
 app.intent("implicit_invocation", (conv, { date, prefecture, keyword }) => {
     return _fetchEventsAndReply(conv, date, prefecture, keyword, 1, true);
+});
+
+app.intent("select.event", (conv, params, option) => {
+    const eventIndex = Number(option.substring(6));
+    const previousCondition = conv.data.previousCondition;
+    const event = previousCondition.result.events[eventIndex];
+    _replyEventBasicCard(conv, event);
 });
 
 app.intent("more_events.continue", conv => {
