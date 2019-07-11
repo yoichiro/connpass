@@ -216,7 +216,7 @@ app.intent("input.welcome", (conv, { date, prefecture, keyword }) => {
         return _fetchEventsAndReply(conv, date, prefecture, keyword, 1, true);
     } else {
         conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
-        conv.ask("こんにちは。各地で開催される予定の勉強会について、日付や都道府県名、キーワードによってお探しいたします。条件をどうぞ。");
+        conv.ask("各地で開催される予定の勉強会について、日付や都道府県名、キーワードによってお探しいたします。例えば、「土曜日に東京でJavaScript」のように話してみてください。では、条件をどうぞ。");
         assistantAnalytics.trace(conv);
     }
 });
