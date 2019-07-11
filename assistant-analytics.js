@@ -22,7 +22,7 @@ class AssistantAnalytics {
       timestamp: Date.now(),
       conversation_id: conv.id,
       request: {
-        available_surfaces: conv.request.availableSurfaces[0].capabilities.map(capability => capability.name),
+        available_surfaces: conv.request.availableSurfaces ? conv.request.availableSurfaces[0].capabilities.map(capability => capability.name) : undefined,
         surfaces: conv.request.surface ? conv.request.surface.capabilities.map(capability => capability.name): undefined,
         is_in_sandbox: conv.request.isInSandbox,
         intent_name: conv.intent || conv.request.inputs[0].intent,
