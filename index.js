@@ -135,7 +135,10 @@ const _fetchEvents = (date, prefecture, keyword, start, count) => {
                         series: {
                             url: event.series ? event.series.url : "",
                             title: event.series ? event.series.title : ""
-                        }
+                        },
+                        limit: event.limit,
+                        accepted: event.accepted,
+                        waiting: event.waiting
                     };
                 });
                 resolve({
@@ -200,10 +203,15 @@ const _createConditionPhrase = (date, prefecture, keyword) => {
 const _replyEventBasicCard = (conv, event) => {
     conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
     conv.contexts.delete(CONTEXT_MORE_EVENTS);
-    conv.ask("ボタンを押して詳細ページに行くか、他の条件を指定してください。");
+    if (conv.surface.capabilities.has('actions.capability.WEB_BROWSER')) {
+        conv.ask("ボタンを押して詳細ページに行くか、他の条件を指定してください。");
+    } else {
+        conv.ask("他の条件を指定してください。");
+    }
     conv.ask(new BasicCard({
         title: event.title,
-        text: `${event.place}  \n${_createStartedAtPhrase(event.startedAt)}  \n${event.catchText}`,
+        subtitle: event.series.title,
+        text: `場所: ${event.place}  \n日付:${_createStartedAtPhrase(event.startedAt)}  \n現在/定員: ${Number(event.accepted) + Number(event.waiting)} / ${event.limit}  \n${event.catchText}`,
         buttons: new Button({
             title: "詳細ページを開く",
             url: event.eventUrl
