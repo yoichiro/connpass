@@ -5,7 +5,8 @@ const {
     Suggestions,
     BasicCard,
     Button,
-    List
+    List,
+    NewSurface
 } = require("actions-on-google");
 const request = require("request");
 const functions = require("firebase-functions");
@@ -20,10 +21,6 @@ const EVENT_COUNT_FOR_SCREEN = 30;
 
 const app = dialogflow({ debug: true });
 
-const _hasCondition = (date, prefecture, keyword) => {
-    return (!!date && !!prefecture && !!keyword);
-};
-
 const _fetchEventsAndReply = (conv, date, prefecture, keyword, start, hasTotalCount) => {
     const eventCount = conv.screen ? EVENT_COUNT_FOR_SCREEN : EVENT_COUNT_FOR_VOICE;
     return _fetchEvents(date, prefecture, keyword, start, eventCount)
@@ -34,6 +31,7 @@ const _fetchEventsAndReply = (conv, date, prefecture, keyword, start, hasTotalCo
                 delete conv.data.previousCondition;
                 conv.ask(`${_createConditionPhrase(date, prefecture, keyword)}予定されていません。他の条件をどうぞ。`);
             } else {
+                const suggestions = [];
                 let msg = hasTotalCount ? `${_createConditionPhrase(date, prefecture, keyword)}${result.resultsAvailable}件予定されています。` : "";
                 if (!conv.screen) {
                     if (result.events.length === 1) {
@@ -54,15 +52,19 @@ const _fetchEventsAndReply = (conv, date, prefecture, keyword, start, hasTotalCo
                     msg += `${start + eventCount}件目以降に進みますか？それとも他の条件で検索しますか？`;
                     conv.contexts.delete(CONTEXT_INPUT_CONDITION);
                     conv.contexts.set(CONTEXT_MORE_EVENTS, 1);
-                    conv.ask(msg);
-                    conv.ask(new Suggestions("進む", "他の条件"));
+                    suggestions.push("進む", "他の条件");
                 } else {
                     msg += conv.screen ? "気になる勉強会をタップしてください。もしくは、他の条件をお話ください。" : "他の条件をどうぞ。";
                     conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
                     conv.contexts.delete(CONTEXT_MORE_EVENTS);
                     // delete conv.data.previousCondition;
-                    conv.ask(msg);
                 }
+                if (!conv.surface.capabilities.has("actions.capability.WEB_BROWSER")
+                        && conv.available.surfaces.capabilities.has("actions.capability.WEB_BROWSER")) {
+                    msg += "また、この検索結果をスマートフォンに送ることもできます。";
+                    suggestions.push("スマートフォンに送る");
+                }
+                conv.ask(msg);
                 if (conv.screen) {
                     if (result.events.length === 1) {
                         _replyEventBasicCard(conv, result.events[0]);
@@ -79,6 +81,9 @@ const _fetchEventsAndReply = (conv, date, prefecture, keyword, start, hasTotalCo
                         }));
                     }
                 }
+                if (suggestions.length > 0) {
+                    conv.ask(new Suggestions(...suggestions));
+                }
             }
             assistantAnalytics.trace(conv);
         })
@@ -87,6 +92,26 @@ const _fetchEventsAndReply = (conv, date, prefecture, keyword, start, hasTotalCo
             conv.close("内部エラーが発生したので、会話を終わります。申し訳ございません。");
             assistantAnalytics.trace(conv);
         });
+};
+
+const _replyEventBasicCard = (conv, event) => {
+    conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
+    conv.contexts.set(CONTEXT_SHOW_EVENT, 1);
+    conv.contexts.delete(CONTEXT_MORE_EVENTS);
+    if (conv.surface.capabilities.has('actions.capability.WEB_BROWSER')) {
+        conv.ask("ボタンを押して詳細ページに行くか、他の条件を指定してください。");
+    } else {
+        conv.ask("他の条件を指定してください。");
+    }
+    conv.ask(new BasicCard({
+        title: event.title,
+        subtitle: event.series.title,
+        text: `場所: ${event.place}  \n日付:${_createStartedAtPhrase(event.startedAt)}  \n現在/定員: ${Number(event.accepted) + Number(event.waiting)} / ${event.limit}  \n${event.catchText}`,
+        buttons: new Button({
+            title: "詳細ページを開く",
+            url: event.eventUrl
+        })
+    }));
 };
 
 const _fetchEvents = (date, prefecture, keyword, start, count) => {
@@ -201,24 +226,8 @@ const _createConditionPhrase = (date, prefecture, keyword) => {
     return `${result.join("、")}の条件にマッチする勉強会は、`;
 };
 
-const _replyEventBasicCard = (conv, event) => {
-    conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
-    conv.contexts.set(CONTEXT_SHOW_EVENT, 1);
-    conv.contexts.delete(CONTEXT_MORE_EVENTS);
-    if (conv.surface.capabilities.has('actions.capability.WEB_BROWSER')) {
-        conv.ask("ボタンを押して詳細ページに行くか、他の条件を指定してください。");
-    } else {
-        conv.ask("他の条件を指定してください。");
-    }
-    conv.ask(new BasicCard({
-        title: event.title,
-        subtitle: event.series.title,
-        text: `場所: ${event.place}  \n日付:${_createStartedAtPhrase(event.startedAt)}  \n現在/定員: ${Number(event.accepted) + Number(event.waiting)} / ${event.limit}  \n${event.catchText}`,
-        buttons: new Button({
-            title: "詳細ページを開く",
-            url: event.eventUrl
-        })
-    }));
+const _hasCondition = (date, prefecture, keyword) => {
+    return (!!date && !!prefecture);
 };
 
 app.intent("input.welcome", (conv, { date, prefecture, keyword }) => {
@@ -246,6 +255,33 @@ app.intent("select.event", (conv, params, option) => {
     _replyEventBasicCard(conv, event);
     conv.ask(new Suggestions("一覧に戻る"));
     assistantAnalytics.trace(conv);
+});
+
+app.intent("send.to.smartphone", conv => {
+    const context = "わかりました。検索結果をスマートフォンに通知します";
+    const notification = "検索結果をご確認ください。";
+    const capabilities = ["actions.capability.SCREEN_OUTPUT", "actions.capability.WEB_BROWSER"];
+    conv.ask(new NewSurface({context, notification, capabilities}));
+});
+
+app.intent("receive.on.smartphone", (conv, input, newSurface) => {
+    conv.contexts.delete(CONTEXT_SHOW_EVENT);
+    const previousCondition = conv.data.previousCondition;
+    if (previousCondition) {
+        const date = previousCondition.date;
+        const prefecture = previousCondition.getState;
+        const keyword = previousCondition.keyword;
+        const previousResult = previousCondition.result;
+        const start = previousResult.resultsStart;
+        return _fetchEventsAndReply(conv, date, prefecture, keyword, start, true);
+    } else {
+        const msg = "他の条件をどうぞ。";
+        conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
+        conv.contexts.delete(CONTEXT_MORE_EVENTS);
+        delete conv.data.previousCondition;
+        conv.ask(msg);
+        assistantAnalytics.trace(conv);
+    }
 });
 
 app.intent("more_events.continue", conv => {
