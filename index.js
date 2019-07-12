@@ -13,6 +13,7 @@ const assistantAnalytics = require("./assistant-analytics");
 
 const CONTEXT_INPUT_CONDITION = "input_condition";
 const CONTEXT_MORE_EVENTS = "more_events";
+const CONTEXT_SHOW_EVENT = "show_event";
 
 const EVENT_COUNT_FOR_VOICE = 3;
 const EVENT_COUNT_FOR_SCREEN = 30;
@@ -202,6 +203,7 @@ const _createConditionPhrase = (date, prefecture, keyword) => {
 
 const _replyEventBasicCard = (conv, event) => {
     conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
+    conv.contexts.set(CONTEXT_SHOW_EVENT, 1);
     conv.contexts.delete(CONTEXT_MORE_EVENTS);
     if (conv.surface.capabilities.has('actions.capability.WEB_BROWSER')) {
         conv.ask("ボタンを押して詳細ページに行くか、他の条件を指定してください。");
@@ -242,6 +244,7 @@ app.intent("select.event", (conv, params, option) => {
     const previousCondition = conv.data.previousCondition;
     const event = previousCondition.result.events[eventIndex];
     _replyEventBasicCard(conv, event);
+    conv.ask(new Suggestions("一覧に戻る"));
     assistantAnalytics.trace(conv);
 });
 
@@ -262,6 +265,26 @@ app.intent("more_events.condition", conv => {
     delete conv.data.previousCondition;
     conv.ask(msg);
     assistantAnalytics.trace(conv);
+});
+
+app.intent("back.to.result", conv => {
+    conv.contexts.delete(CONTEXT_SHOW_EVENT);
+    const previousCondition = conv.data.previousCondition;
+    if (previousCondition) {
+        const date = previousCondition.date;
+        const prefecture = previousCondition.getState;
+        const keyword = previousCondition.keyword;
+        const previousResult = previousCondition.result;
+        const start = previousResult.resultsStart;
+        return _fetchEventsAndReply(conv, date, prefecture, keyword, start, false);
+    } else {
+        const msg = "他の条件をどうぞ。";
+        conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
+        conv.contexts.delete(CONTEXT_MORE_EVENTS);
+        delete conv.data.previousCondition;
+        conv.ask(msg);
+        assistantAnalytics.trace(conv);
+    }
 });
 
 app.intent("input.unknown", conv => {
