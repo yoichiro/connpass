@@ -1,4 +1,5 @@
 const { Logging } = require('@google-cloud/logging');
+const request = require('request');
 
 const logging = new Logging({
   projectId: process.env.GCLOUD_PROJECT
@@ -18,8 +19,7 @@ const LogMetadata = {
 
 class AssistantAnalytics {
   trace(conv) {
-    const data = {
-      timestamp: Date.now(),
+    const payload = {
       conversation_id: conv.id,
       request: {
         available_surfaces: conv.request.availableSurfaces ? conv.request.availableSurfaces[0].capabilities.map(capability => capability.name) : undefined,
@@ -38,8 +38,38 @@ class AssistantAnalytics {
       no_inputs: JSON.stringify(conv.noInputs),
       speech_biasing: conv.speechBiasing
     };
-    const entry = log.entry(LogMetadata, data);
+
+    const entry = log.entry(LogMetadata, payload);
     log.info(entry);
+
+    const body = {
+      header: {
+        timestamp: Date.now(),
+        type: 'actions-on-google'
+      },
+      payload,
+      extra: {
+      }
+    };
+    request(
+      'https://us-central1-conversation-analytics-250005.cloudfunctions.net/aggregate',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8'
+        },
+        auth: {
+          'bearer': '1b93ce3dd21f4b048dea4a1a38769cd68bc9850f51b473fb38b4d302d835867b'
+        },
+        body: JSON.stringify(body)
+      },
+      (error, response, body) => {
+        if (response.statusCode !== 200) {
+          console.log('error: ' + error);
+          console.log('error body: ' + body);
+        }
+      }
+    );
   }
 }
 
