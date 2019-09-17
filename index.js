@@ -26,77 +26,76 @@ const analytics = new ConversationAnalytics({
 
 const app = dialogflow({ debug: true });
 
-const _fetchEventsAndReply = (conv, date, prefecture, keyword, start, hasTotalCount) => {
+const _fetchEventsAndReply = async (conv, date, prefecture, keyword, start, hasTotalCount) => {
     const eventCount = conv.screen ? EVENT_COUNT_FOR_SCREEN : EVENT_COUNT_FOR_VOICE;
-    return _fetchEvents(date, prefecture, keyword, start, eventCount)
-        .then(result => {
-            if (result.events.length === 0) {
-                conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
-                conv.contexts.delete(CONTEXT_MORE_EVENTS);
-                delete conv.data.previousCondition;
-                conv.ask(`${_createConditionPhrase(date, prefecture, keyword)}予定されていません。他の条件をどうぞ。`);
-            } else {
-                const suggestions = [];
-                let msg = hasTotalCount ? `${_createConditionPhrase(date, prefecture, keyword)}${result.resultsAvailable}件予定されています。` : "";
-                if (!conv.screen) {
-                    if (result.events.length === 1) {
-                        msg += _createEventInformationPhrase(result.events[0]);
-                    } else {
-                        result.events.forEach((event, index) => {
-                            msg += _createEventInformationPhraseWithIndex(start + index, event);
-                        });
-                    }
-                }
-                conv.data.previousCondition = {
-                    date: date,
-                    getState: prefecture,
-                    keyword: keyword,
-                    result: result
-                };
-                if (!conv.screen && _isExistsMoreEvents(result)) {
-                    msg += `${start + eventCount}件目以降に進みますか？それとも他の条件で検索しますか？`;
-                    conv.contexts.delete(CONTEXT_INPUT_CONDITION);
-                    conv.contexts.set(CONTEXT_MORE_EVENTS, 1);
-                    suggestions.push("進む", "他の条件");
+    try {
+        const result = await _fetchEvents(date, prefecture, keyword, start, eventCount)
+        if (result.events.length === 0) {
+            conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
+            conv.contexts.delete(CONTEXT_MORE_EVENTS);
+            delete conv.data.previousCondition;
+            conv.ask(`${_createConditionPhrase(date, prefecture, keyword)}予定されていません。他の条件をどうぞ。`);
+        } else {
+            const suggestions = [];
+            let msg = hasTotalCount ? `${_createConditionPhrase(date, prefecture, keyword)}${result.resultsAvailable}件予定されています。` : "";
+            if (!conv.screen) {
+                if (result.events.length === 1) {
+                    msg += _createEventInformationPhrase(result.events[0]);
                 } else {
-                    msg += conv.screen ? "気になる勉強会をタップしてください。もしくは、他の条件をお話ください。" : "他の条件をどうぞ。";
-                    conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
-                    conv.contexts.delete(CONTEXT_MORE_EVENTS);
-                    // delete conv.data.previousCondition;
-                }
-                if (!conv.surface.capabilities.has("actions.capability.WEB_BROWSER")
-                        && conv.available.surfaces.capabilities.has("actions.capability.WEB_BROWSER")) {
-                    msg += "また、この検索結果をスマートフォンに送ることもできます。";
-                    suggestions.push("スマートフォンに送る");
-                }
-                conv.ask(msg);
-                if (conv.screen) {
-                    if (result.events.length === 1) {
-                        _replyEventBasicCard(conv, result.events[0]);
-                    } else {
-                        const items = {};
-                        result.events.forEach((event, index) => {
-                            items[`EVENT_${index}`] = {
-                                title: event.title,
-                                description: `${result.events[0].place}\n${_createStartedAtPhrase(event.startedAt)}`
-                            };
-                        });
-                        conv.ask(new List({
-                            items
-                        }));
-                    }
-                }
-                if (suggestions.length > 0) {
-                    conv.ask(new Suggestions(...suggestions));
+                    result.events.forEach((event, index) => {
+                        msg += _createEventInformationPhraseWithIndex(start + index, event);
+                    });
                 }
             }
-            analytics.trace(conv);
-        })
-        .catch(error => {
-            console.log("error", error);
-            conv.close("内部エラーが発生したので、会話を終わります。申し訳ございません。");
-            analytics.trace(conv);
-        });
+            conv.data.previousCondition = {
+                date: date,
+                getState: prefecture,
+                keyword: keyword,
+                result: result
+            };
+            if (!conv.screen && _isExistsMoreEvents(result)) {
+                msg += `${start + eventCount}件目以降に進みますか？それとも他の条件で検索しますか？`;
+                conv.contexts.delete(CONTEXT_INPUT_CONDITION);
+                conv.contexts.set(CONTEXT_MORE_EVENTS, 1);
+                suggestions.push("進む", "他の条件");
+            } else {
+                msg += conv.screen ? "気になる勉強会をタップしてください。もしくは、他の条件をお話ください。" : "他の条件をどうぞ。";
+                conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
+                conv.contexts.delete(CONTEXT_MORE_EVENTS);
+                // delete conv.data.previousCondition;
+            }
+            if (!conv.surface.capabilities.has("actions.capability.WEB_BROWSER")
+                    && conv.available.surfaces.capabilities.has("actions.capability.WEB_BROWSER")) {
+                msg += "また、この検索結果をスマートフォンに送ることもできます。";
+                suggestions.push("スマートフォンに送る");
+            }
+            conv.ask(msg);
+            if (conv.screen) {
+                if (result.events.length === 1) {
+                    _replyEventBasicCard(conv, result.events[0]);
+                } else {
+                    const items = {};
+                    result.events.forEach((event, index) => {
+                        items[`EVENT_${index}`] = {
+                            title: event.title,
+                            description: `${result.events[0].place}\n${_createStartedAtPhrase(event.startedAt)}`
+                        };
+                    });
+                    conv.ask(new List({
+                        items
+                    }));
+                }
+            }
+            if (suggestions.length > 0) {
+                conv.ask(new Suggestions(...suggestions));
+            }
+        }
+        await analytics.trace(conv);
+    } catch(error) {
+        console.log("error", error);
+        conv.close("内部エラーが発生したので、会話を終わります。申し訳ございません。");
+        await analytics.trace(conv);
+    }
 };
 
 const _replyEventBasicCard = (conv, event) => {
@@ -235,41 +234,42 @@ const _hasCondition = (date, prefecture, keyword) => {
     return (!!date && !!prefecture);
 };
 
-app.intent("input.welcome", (conv, { date, prefecture, keyword }) => {
+app.intent("input.welcome", async (conv, { date, prefecture, keyword }) => {
     if (_hasCondition(date, prefecture, keyword)) {
-        return _fetchEventsAndReply(conv, date, prefecture, keyword, 1, true);
+        return await _fetchEventsAndReply(conv, date, prefecture, keyword, 1, true);
     } else {
         conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
         conv.ask("各地で開催される勉強会をお探しいたします。都道府県名や日付を教えてください。または「土曜日に東京でJavaScript」のように話してみてください。");
-        analytics.trace(conv);
+        await analytics.trace(conv);
     }
 });
 
-app.intent("input.condition", (conv, { date, prefecture, keyword }) => {
-    return _fetchEventsAndReply(conv, date, prefecture, keyword, 1, true);
+app.intent("input.condition", async (conv, { date, prefecture, keyword }) => {
+    return await _fetchEventsAndReply(conv, date, prefecture, keyword, 1, true);
 });
 
-app.intent("implicit_invocation", (conv, { date, prefecture, keyword }) => {
-    return _fetchEventsAndReply(conv, date, prefecture, keyword, 1, true);
+app.intent("implicit_invocation", async (conv, { date, prefecture, keyword }) => {
+    return await _fetchEventsAndReply(conv, date, prefecture, keyword, 1, true);
 });
 
-app.intent("select.event", (conv, params, option) => {
+app.intent("select.event", async (conv, params, option) => {
     const eventIndex = Number(option.substring(6));
     const previousCondition = conv.data.previousCondition;
     const event = previousCondition.result.events[eventIndex];
     _replyEventBasicCard(conv, event);
     conv.ask(new Suggestions("一覧に戻る"));
-    analytics.trace(conv);
+    await analytics.trace(conv);
 });
 
-app.intent("send.to.smartphone", conv => {
+app.intent("send.to.smartphone", async (conv) => {
     const context = "わかりました。検索結果をスマートフォンに通知します";
     const notification = "検索結果をご確認ください。";
     const capabilities = ["actions.capability.SCREEN_OUTPUT", "actions.capability.WEB_BROWSER"];
     conv.ask(new NewSurface({context, notification, capabilities}));
+    await analytics.trace(conv);
 });
 
-app.intent("receive.on.smartphone", (conv, input, newSurface) => {
+app.intent("receive.on.smartphone", async (conv, input, newSurface) => {
     conv.contexts.delete(CONTEXT_SHOW_EVENT);
     const previousCondition = conv.data.previousCondition;
     if (previousCondition) {
@@ -278,37 +278,37 @@ app.intent("receive.on.smartphone", (conv, input, newSurface) => {
         const keyword = previousCondition.keyword;
         const previousResult = previousCondition.result;
         const start = previousResult.resultsStart;
-        return _fetchEventsAndReply(conv, date, prefecture, keyword, start, true);
+        return await _fetchEventsAndReply(conv, date, prefecture, keyword, start, true);
     } else {
         const msg = "他の条件をどうぞ。";
         conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
         conv.contexts.delete(CONTEXT_MORE_EVENTS);
         delete conv.data.previousCondition;
         conv.ask(msg);
-        analytics.trace(conv);
+        await analytics.trace(conv);
     }
 });
 
-app.intent("more_events.continue", conv => {
+app.intent("more_events.continue", async (conv) => {
     const previousCondition = conv.data.previousCondition;
     const date = previousCondition.date;
     const prefecture = previousCondition.getState;
     const keyword = previousCondition.keyword;
     const previousResult = previousCondition.result;
     const start = previousResult.resultsStart + previousResult.resultsReturned;
-    return _fetchEventsAndReply(conv, date, prefecture, keyword, start, false);
+    return await _fetchEventsAndReply(conv, date, prefecture, keyword, start, false);
 });
 
-app.intent("more_events.condition", conv => {
+app.intent("more_events.condition", async (conv) => {
     const msg = "他の条件をどうぞ。";
     conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
     conv.contexts.delete(CONTEXT_MORE_EVENTS);
     delete conv.data.previousCondition;
     conv.ask(msg);
-    analytics.trace(conv);
+    await analytics.trace(conv);
 });
 
-app.intent("back.to.result", conv => {
+app.intent("back.to.result", async (conv) => {
     conv.contexts.delete(CONTEXT_SHOW_EVENT);
     const previousCondition = conv.data.previousCondition;
     if (previousCondition) {
@@ -317,18 +317,18 @@ app.intent("back.to.result", conv => {
         const keyword = previousCondition.keyword;
         const previousResult = previousCondition.result;
         const start = previousResult.resultsStart;
-        return _fetchEventsAndReply(conv, date, prefecture, keyword, start, false);
+        return await _fetchEventsAndReply(conv, date, prefecture, keyword, start, false);
     } else {
         const msg = "他の条件をどうぞ。";
         conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
         conv.contexts.delete(CONTEXT_MORE_EVENTS);
         delete conv.data.previousCondition;
         conv.ask(msg);
-        analytics.trace(conv);
+        await analytics.trace(conv);
     }
 });
 
-app.intent("input.unknown", conv => {
+app.intent("input.unknown", async (conv) => {
     const msg = [
         "よくわかりませんでした。いつ、どこで、どんな勉強会が開催されるのかを条件指定してください。",
         "よく聞き取れませんでした。いつ、どこで、どんな勉強会が開催されるのかを条件指定してください。",
@@ -337,20 +337,20 @@ app.intent("input.unknown", conv => {
     conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
     conv.contexts.delete(CONTEXT_MORE_EVENTS);
     conv.ask(msg[Math.floor(Math.random() * msg.length)]);
-    analytics.trace(conv);
+    await analytics.trace(conv);
 });
 
-app.intent("no_input.condition", conv => {
+app.intent("no_input.condition", async (conv) => {
     const msg = [
         "よく聞き取れませんでした。条件を言ってください。",
         "まだそこにいらっしゃいますか？条件をどうぞ。"
     ];
     conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
     conv.ask(msg[Math.floor(Math.random() * msg.length)]);
-    analytics.trace(conv);
+    await analytics.trace(conv);
 });
 
-app.intent("no_input.more_events", conv => {
+app.intent("no_input.more_events", async (conv) => {
     const msg = [
         "よく聞き取れませんでした。条件を言ってください。",
         "まだそこにいらっしゃいますか？条件をどうぞ。"
@@ -358,10 +358,10 @@ app.intent("no_input.more_events", conv => {
     conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
     conv.contexts.delete(CONTEXT_MORE_EVENTS);
     conv.ask(msg[Math.floor(Math.random() * msg.length)]);
-    analytics.trace(conv);
+    await analytics.trace(conv);
 });
 
-app.intent("more_events.unknown", conv => {
+app.intent("more_events.unknown", async (conv) => {
     const msg = [
         "よくわかりませんでした。続きの勉強会に進みますか？それとも他の条件で探しますか？",
         "よく聞き取れませんでした。続きの勉強会に進みますか？それとも他の条件で探しますか？",
@@ -370,18 +370,18 @@ app.intent("more_events.unknown", conv => {
     conv.contexts.delete(CONTEXT_INPUT_CONDITION);
     conv.contexts.set(CONTEXT_MORE_EVENTS, 1);
     conv.ask(msg[Math.floor(Math.random() * msg.length)]);
-    analytics.trace(conv);
+    await analytics.trace(conv);
 });
 
-app.intent("help", conv => {
+app.intent("help", async (conv) => {
     conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
     conv.ask("勉強会の開催情報を探すために、いつ、どこで、どんな勉強会が開催されるのかを条件指定してください。例えば、「明日東京で開催されるJavaScript関連の勉強会を教えて」、というように言ってみてください。");
-    analytics.trace(conv);
+    await analytics.trace(conv);
 });
 
-app.intent("quit", conv => {
+app.intent("quit", async (conv) => {
     conv.close("わかりました。また勉強会を探しに来てくださいね。");
-    analytics.trace(conv);
+    await analytics.trace(conv);
 });
 
 exports.connpass = functions.https.onRequest(app);
