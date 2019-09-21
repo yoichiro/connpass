@@ -24,7 +24,7 @@ const analytics = new ConversationAnalytics({
     token: process.env.ANALYTICS_TOKEN
 });
 
-const app = dialogflow({ debug: true });
+const app = dialogflow();
 
 const _fetchEventsAndReply = async (conv, date, prefecture, keyword, start, hasTotalCount) => {
     const eventCount = conv.screen ? EVENT_COUNT_FOR_SCREEN : EVENT_COUNT_FOR_VOICE;
@@ -91,10 +91,12 @@ const _fetchEventsAndReply = async (conv, date, prefecture, keyword, start, hasT
             }
         }
         await analytics.trace(conv);
+        console.log('conv', JSON.stringify(conv));
     } catch(error) {
         console.log("error", error);
         conv.close("内部エラーが発生したので、会話を終わります。申し訳ございません。");
         await analytics.trace(conv);
+        console.log('conv', JSON.stringify(conv));
     }
 };
 
@@ -154,7 +156,6 @@ const _fetchEvents = (date, prefecture, keyword, start, count) => {
                 console.log("statusCode", response.statusCode);
                 reject(response.statusCode);
             } else {
-                console.log(body.events);
                 const events = body.events.map(event => {
                     return {
                         place: event.place,
@@ -241,6 +242,7 @@ app.intent("input.welcome", async (conv, { date, prefecture, keyword }) => {
         conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
         conv.ask("各地で開催される勉強会をお探しいたします。都道府県名や日付を教えてください。または「土曜日に東京でJavaScript」のように話してみてください。");
         await analytics.trace(conv);
+        console.log('conv', JSON.stringify(conv));
     }
 });
 
@@ -259,6 +261,7 @@ app.intent("select.event", async (conv, params, option) => {
     _replyEventBasicCard(conv, event);
     conv.ask(new Suggestions("一覧に戻る"));
     await analytics.trace(conv);
+    console.log('conv', JSON.stringify(conv));
 });
 
 app.intent("send.to.smartphone", async (conv) => {
@@ -267,6 +270,7 @@ app.intent("send.to.smartphone", async (conv) => {
     const capabilities = ["actions.capability.SCREEN_OUTPUT", "actions.capability.WEB_BROWSER"];
     conv.ask(new NewSurface({context, notification, capabilities}));
     await analytics.trace(conv);
+    console.log('conv', JSON.stringify(conv));
 });
 
 app.intent("receive.on.smartphone", async (conv, input, newSurface) => {
@@ -286,6 +290,7 @@ app.intent("receive.on.smartphone", async (conv, input, newSurface) => {
         delete conv.data.previousCondition;
         conv.ask(msg);
         await analytics.trace(conv);
+        console.log('conv', JSON.stringify(conv));
     }
 });
 
@@ -306,6 +311,7 @@ app.intent("more_events.condition", async (conv) => {
     delete conv.data.previousCondition;
     conv.ask(msg);
     await analytics.trace(conv);
+    console.log('conv', JSON.stringify(conv));
 });
 
 app.intent("back.to.result", async (conv) => {
@@ -325,6 +331,7 @@ app.intent("back.to.result", async (conv) => {
         delete conv.data.previousCondition;
         conv.ask(msg);
         await analytics.trace(conv);
+        console.log('conv', JSON.stringify(conv));
     }
 });
 
@@ -338,6 +345,7 @@ app.intent("input.unknown", async (conv) => {
     conv.contexts.delete(CONTEXT_MORE_EVENTS);
     conv.ask(msg[Math.floor(Math.random() * msg.length)]);
     await analytics.trace(conv);
+    console.log('conv', JSON.stringify(conv));
 });
 
 app.intent("no_input.condition", async (conv) => {
@@ -348,6 +356,7 @@ app.intent("no_input.condition", async (conv) => {
     conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
     conv.ask(msg[Math.floor(Math.random() * msg.length)]);
     await analytics.trace(conv);
+    console.log('conv', JSON.stringify(conv));
 });
 
 app.intent("no_input.more_events", async (conv) => {
@@ -359,6 +368,7 @@ app.intent("no_input.more_events", async (conv) => {
     conv.contexts.delete(CONTEXT_MORE_EVENTS);
     conv.ask(msg[Math.floor(Math.random() * msg.length)]);
     await analytics.trace(conv);
+    console.log('conv', JSON.stringify(conv));
 });
 
 app.intent("more_events.unknown", async (conv) => {
@@ -371,17 +381,20 @@ app.intent("more_events.unknown", async (conv) => {
     conv.contexts.set(CONTEXT_MORE_EVENTS, 1);
     conv.ask(msg[Math.floor(Math.random() * msg.length)]);
     await analytics.trace(conv);
+    console.log('conv', JSON.stringify(conv));
 });
 
 app.intent("help", async (conv) => {
     conv.contexts.set(CONTEXT_INPUT_CONDITION, 1);
     conv.ask("勉強会の開催情報を探すために、いつ、どこで、どんな勉強会が開催されるのかを条件指定してください。例えば、「明日東京で開催されるJavaScript関連の勉強会を教えて」、というように言ってみてください。");
     await analytics.trace(conv);
+    console.log('conv', JSON.stringify(conv));
 });
 
 app.intent("quit", async (conv) => {
     conv.close("わかりました。また勉強会を探しに来てくださいね。");
     await analytics.trace(conv);
+    console.log('conv', JSON.stringify(conv));
 });
 
 exports.connpass = functions.https.onRequest(app);
