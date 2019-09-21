@@ -650,10 +650,10 @@ continuation-local-storage@^3.2.1:
     async-listener "^0.6.0"
     emitter-listener "^1.1.1"
 
-conversation-analytics-client@^0.0.8:
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/conversation-analytics-client/-/conversation-analytics-client-0.0.8.tgz#8a354fbdb5fc1ac13a1f1670c64a164b4e8843d8"
-  integrity sha512-tV/dUw5TaCe74HKtYA476vRhyS4+ugtIYebxB+1vkHrHVzEzhy2bRZ7pe2zrOcdcBY+bvpkegQVsOwu1Pc/cGA==
+conversation-analytics-client@^0.0.9:
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/conversation-analytics-client/-/conversation-analytics-client-0.0.9.tgz#29e2d60c6ef384afcdd4457eee8d679b2bb7f39a"
+  integrity sha512-Pr13Hjd54z9WxduunfBLaQH0gw4508EhssMVU/THElzg9BPKzVPiI29jvnW06FQI8jTfAoW5MVgBKQhk4nHeQA==
   dependencies:
     request "^2.88.0"
 
