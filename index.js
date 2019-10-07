@@ -21,7 +21,8 @@ const EVENT_COUNT_FOR_SCREEN = 30;
 
 const analytics = new ConversationAnalytics({
     assistantType: AssistantType.ACTIONS_ON_GOOGLE,
-    token: process.env.ANALYTICS_TOKEN
+    token: process.env.ANALYTICS_TOKEN,
+    userId: true
 });
 
 const app = dialogflow();
